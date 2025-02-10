@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: typeface
+    ports:
+      - "5432:5432"
+    volumes:
+      - $HOME/db/postgres6:/var/lib/postgresql/data
+      - ./src/main/resources/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d typeface"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  localstack:
+    container_name: typeface-localstack
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+      - "127.0.0.1:53:53"                # Expose DNS server to host
+      - "127.0.0.1:53:53/udp"            # Expose DNS server to host
+    volumes:
+      - $HOME/localstack/volume:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
